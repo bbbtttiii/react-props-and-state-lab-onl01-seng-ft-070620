@@ -15,6 +15,38 @@ class App extends React.Component {
     }
   }
 
+  //arrow function binds 'this', can also bind separately in constructor
+  onChangeType = (event) => {
+    this.setState({
+      filters: {type: event.target.value}
+    });
+  }
+
+  onFindPetsClick = () => {
+    let url = '/api/pets'
+    if (this.state.filters.type !== 'all') {
+      url += `?type=${this.state.filters.type}`
+    } 
+    fetch(url)
+    .then(r => r.json())
+    .then(petsJSON => {
+      this.setState({
+        pets: petsJSON
+      }) 
+    })
+  }
+
+  onAdoptPet = (id) => {
+    let petsArrayCopy = [...this.state.pets]
+    let pet = petsArrayCopy.find(p => p.id === id)
+    // can use spread operator or obj assign:
+    // const pet = Object.assign({}, this.state.pets.find(p => p.id === id))
+    pet.isAdopted = true
+    this.setState({
+      pets: petsArrayCopy
+    })
+  }
+
   render() {
     return (
       <div className="ui container">
@@ -24,10 +56,13 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters 
+                onChangeType={this.onChangeType}
+                onFindPetsClick={this.onFindPetsClick}
+              />
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+              <PetBrowser onAdoptPet={this.onAdoptPet} pets={this.state.pets}/>
             </div>
           </div>
         </div>
